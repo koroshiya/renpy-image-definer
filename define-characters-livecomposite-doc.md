@@ -1,5 +1,5 @@
 <h3>Format</h3>
-
+<pre>
 This script assumes you have a folder for characters, and each character has their own folder.
 Inside of a character's folder are three more folders: outfits, poses, expressions.
 Each of those folders has a bunch of images.
@@ -58,3 +58,4 @@ characters: {
 Now that the script knows where each of sara's outfits & such are located, it can start building & defining her sprites.
 At this point the script loops over each character and their outfits, poses, etc. creating them as it goes.
 Then, we at last reach the LiveComposite method, which pushes the images all together.
+</pre>
