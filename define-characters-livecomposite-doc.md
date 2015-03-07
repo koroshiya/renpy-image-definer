@@ -12,7 +12,7 @@ characters/sara/expressions/sad.png
 characters/sara/expressions/happy.png
 
 In this example, we'd call the function
-Code:
+
 define_characters("characters/")
 
 which would create and define the images:
@@ -27,8 +27,25 @@ Since they're transparent PNGs, these files can overlap just fine, and the indiv
 If you're saving character sprites as PSD files, just toggle the layers on one at a time when saving 
 and you'll already have the right size, spacing, etc.
 
-<h3>How it works</h3>
+However, the above only works if all poses use the same outfits.
+In this example, we assume outfits change with their poses.
 
+Running the script with the images:
+/characters/sara/poses/arms_crossed/pose.png
+/characters/sara/poses/arms_crossed/school_uniform.png
+/characters/sara/poses/casual/pose.png
+/characters/sara/poses/casual/school_uniform.png
+/characters/sara/expressions/happy.png
+would result in:
+-sara arms_crossed school_uniform happy
+-sara casual school_uniform happy
+
+This approach assumes that outfits change to match the body movement of a pose, but expressions remain the same.
+If you wanted to have expressions change with the pose as well (eg. the character moves their head), then you would follow the same procedure as with the outfits.
+
+</pre>
+<h3>How it works</h3>
+<pre>
 Simply put, we tell the script where to find and how to group a bunch of images, then we smush them together.
 ie. We get sara's pose, put the uniform on top of that, slap an expression onto her face, 
 and as a result we have a normal character sprite.
@@ -38,7 +55,7 @@ in the above, we tell the script to check the folder "characters" for character 
 The script finds the "sara" folder in there and thus assumes that she's a character.
 Within the sara folder the script finds "outfits", "expressions" and "poses", searching each of those folders.
 Once it's done searching, the script has a dictionary of characters, poses, etc. It looks a little like this:
-Code:
+
 characters: {
   'sara': {
     'poses': {
