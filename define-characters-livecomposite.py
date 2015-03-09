@@ -40,7 +40,7 @@ def define_image(size, path_tuple, argList):
         plist.insert(1, 'flip') #flip after char name. eg. sara flip arms_crossed etc.
         renpy.image(tuple(plist), LiveComposite(size, *flipArr))
 
-def define_characters(characterImageFolder, size=(370, 512), flip=True):
+def define_characters(characterImageFolder, size=(370, 512), flip=True, defineChar=False):
         characters = {}
 
         for path in renpy.list_files():
@@ -94,6 +94,13 @@ def define_characters(characterImageFolder, size=(370, 512), flip=True):
             elif 'outfits' not in character and 'expressions' in character:
                 #Base sprite contains pose and outfit
                 define_extra(size, character, None, None, cKey, None, None)
+
+            if defineChar:
+                character = Character(cKey.capitalize(), image=cKey.lower())
+                def f(what, k=character, outfit=None, pose=None, expression=None, **kwargs):
+                    #renpy.transition(dissolve, layer="master") #Uncomment to dissolve between expressions, poses, etc.
+                    k(what, **kwargs)
+                setattr(sys.modules[__name__], key, f)
 
 def define_extra(size, character, pose, outfit, cKey, oKey, pKey):
         for eKey in character['expressions']:
