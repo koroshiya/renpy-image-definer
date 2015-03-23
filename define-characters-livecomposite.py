@@ -23,15 +23,19 @@
 #-Once again, an expressions folder containing each expression
 ###
 
-def define_image(size, path_tuple, argList):
-        path_tuple = tuple(entry for entry in path_tuple if entry is not None)
-        args = []
-        for i in xrange(1, len(argList), 2):
-            if argList[i] is not None:
-                args.extend([(0, 0), argList[i]])
-        renpy.image(path_tuple, LiveComposite(size, *args))
-        #if 'lucas' in path_tuple:
-        #    print 'Defining image', path_tuple, 'from', tuple(args)
+def define_image(size, side, path_tuple, argList):
+    path_tuple = tuple(entry for entry in path_tuple if entry is not None)
+    if side:
+        path_tuple = ('side', ) + path_tuple
+    args = []
+    for i in xrange(1, len(argList), 2):
+        if argList[i] is not None:
+            args.extend([(0, 0), argList[i]])
+    renpy.image(path_tuple, LiveComposite(size, *args))
+    if 'valerie' in path_tuple:
+        print path_tuple
+
+    if not side:
 
         flipArr = args
         for i in xrange(1, len(args), 2):
@@ -40,82 +44,89 @@ def define_image(size, path_tuple, argList):
         plist.insert(1, 'flip') #flip after char name. eg. sara flip arms_crossed etc.
         renpy.image(tuple(plist), LiveComposite(size, *flipArr))
 
-def define_characters(characterImageFolder, size=(370, 512), flip=True, defineChar=False):
-        characters = {}
+def get_character_indexes():
+    return {'expressions': {}, 'poses': {}, 'outfits': {}, 'outfits_extra': {}}
 
-        for path in renpy.list_files():
-            if path.startswith(characterImageFolder):
-              path_list = path.split("/")
+def define_chars(characterImageFolder, size=(370, 512), flip=True, side=False):
+    chars = {}
 
-              if path.startswith(characterImageFolder + path_list[-4] + "/poses/"):
-                    if path_list[-4] not in characters:
-                      characters[path_list[-4]] = {'expressions': {}, 'poses': {}, 'outfits': {}, 'outfits_extra': {}} #New character
-                    if path_list[-2] not in characters[path_list[-4]]['poses']:
-                      characters[path_list[-4]]['poses'][path_list[-2]] = {} #New pose
-                    splitVal = os.path.splitext(path_list[-1])[0]
-                    if splitVal not in characters[path_list[-4]]['poses'][path_list[-2]]:
-                      if splitVal != 'pose': #Ignore pose.png
-                        characters[path_list[-4]]['poses'][path_list[-2]][splitVal] = path #New outfit
-              elif path == characterImageFolder + path_list[-2] + '/base.png':
-                #print 'found base for', path_list[-2], 'at', path
-                if path_list[-2] not in characters:
-                  characters[path_list[-2]] = {'expressions': {}, 'poses': {}, 'outfits': {}, 'outfits_extra': {}} #New character
-                characters[path_list[-2]]['base'] = path
-                #print characters[path_list[-2]]
-              else:
-                for val in ['outfits', 'poses', 'expressions', 'outfits_extra']:
-                  if path.startswith(characterImageFolder + path_list[-3] + "/" + val + "/") and path_list[-2] == val:
-                    if path_list[-3] not in characters:
-                      characters[path_list[-3]] = {'expressions': {}, 'poses': {}, 'outfits': {}, 'outfits_extra': {}}
-                    splitVal = os.path.splitext(path_list[-1])[0]
-                    if splitVal not in characters[path_list[-3]][path_list[-2]]:
-                      characters[path_list[-3]][path_list[-2]][splitVal] = path
-                    break
+    for path in renpy.list_files():
+        if path.startswith(characterImageFolder):
+          pList = path.split("/")
 
-        #print characters
-        for cKey in characters:
-            character = characters[cKey]
-            if 'outfits' in character: #Standard directory structure
-              for oKey in character['outfits']:
-                outfit = character['outfits'][oKey]
+          if len(pList) >= 4 and path.startswith(characterImageFolder + pList[-4] + "/poses/"):
+                if pList[-4] not in chars:
+                  chars[pList[-4]] = get_character_indexes() #New character
+                if pList[-2] not in chars[pList[-4]]['poses']:
+                  chars[pList[-4]]['poses'][pList[-2]] = {} #New pose
+                splitVal = os.path.splitext(pList[-1])[0]
+                if splitVal not in chars[pList[-4]]['poses'][pList[-2]] and splitVal != 'pose':
+                  chars[pList[-4]]['poses'][pList[-2]][splitVal] = path #New outfit
+          elif len(pList) >= 4 and path.startswith(characterImageFolder + pList[-4] + "/outfits_extra/"):
+                if pList[-4] not in chars:
+                  chars[pList[-4]] = get_character_indexes() #New character
+                if pList[-2] not in chars[pList[-4]]['outfits_extra']:
+                  chars[pList[-4]]['outfits_extra'][pList[-2]] = {} #New outfit extra
+                splitVal = os.path.splitext(pList[-1])[0]
+                if splitVal not in chars[pList[-4]]['outfits_extra'][pList[-2]]:
+                  chars[pList[-4]]['outfits_extra'][pList[-2]][splitVal] = path #New pose
+          elif path == characterImageFolder + pList[-2] + '/base.png':
+            if pList[-2] not in chars:
+              chars[pList[-2]] = get_character_indexes() #New character
+            chars[pList[-2]]['base'] = path
+          elif len(pList) >= 3:
+            for val in ['outfits', 'poses', 'expressions', 'outfits_extra']:
+              if path.startswith(characterImageFolder + pList[-3] + "/" + val + "/") and pList[-2] == val:
+                if pList[-3] not in chars:
+                  chars[pList[-3]] = get_character_indexes()
+                splitVal = os.path.splitext(pList[-1])[0]
+                if splitVal not in chars[pList[-3]][pList[-2]]:
+                  chars[pList[-3]][pList[-2]][splitVal] = path
+                break
+
+    for cKey in chars:
+        character = chars[cKey]
+        if len(character['outfits']) > 0: #Standard directory structure
+          for oKey in character['outfits']:
+            outfit = character['outfits'][oKey]
+            if len(character['poses']) > 0:
                 for pKey in character['poses']:
                     pose = character['poses'][pKey]
-                    define_extra(size, character, pose, outfit, cKey, oKey, pKey)
-            if 'poses' in character: #Pose-specific outfits
-              for pKey in character['poses']:
-                pose = character['poses'][pKey]
-                if isinstance(pose, dict):
-                  posePath = characterImageFolder + cKey + '/poses/' + pKey + '/' + 'pose.png'
-                  for oKey in pose:
-                    outfit = pose[oKey]
-                    define_extra(size, character, posePath, outfit, cKey, oKey, pKey)
-                else:
-                    define_extra(size, character, pose, None, cKey, None, pKey)
-            elif 'outfits' not in character and 'expressions' in character:
-                #Base sprite contains pose and outfit
-                define_extra(size, character, None, None, cKey, None, None)
+                    define_extra(size, side, character, pose, outfit, cKey, oKey, pKey)
+            else:
+                define_extra(size, side, character, None, outfit, cKey, oKey, None)
+        if len(character['poses']) > 0: #Pose-specific outfits
+          for pKey in character['poses']:
+            pose = character['poses'][pKey]
+            if isinstance(pose, dict):
+              posePath = characterImageFolder + cKey + '/poses/' + pKey + '/' + 'pose.png'
+              for oKey in pose:
+                outfit = pose[oKey]
+                define_extra(size, side, character, posePath, outfit, cKey, oKey, pKey)
+            else:
+                define_extra(size, side, character, pose, None, cKey, None, pKey)
+        elif len(character['outfits']) == 0 and len(character['expressions']) > 0:
+            #Base sprite contains pose and outfit
+            define_extra(size, side, character, None, None, cKey, None, None)
 
-            if defineChar:
-                character = Character(cKey.capitalize(), image=cKey.lower())
-                def f(what, k=character, outfit=None, pose=None, expression=None, **kwargs):
-                    #renpy.transition(dissolve, layer="master") #Uncomment to dissolve between expressions, poses, etc.
-                    k(what, **kwargs)
-                setattr(sys.modules[__name__], key, f)
+def define_extra(size, side, character, pose, outfit, cKey, oKey, pKey):
+    for eKey in character['expressions']:
+        expression = character['expressions'][eKey]
+        nameList = tuple([cKey, oKey, pKey, eKey])
+        args = [(0, 0), pose, (0, 0), outfit, (0, 0), expression]
 
-def define_extra(size, character, pose, outfit, cKey, oKey, pKey):
-        for eKey in character['expressions']:
-            expression = character['expressions'][eKey]
-            nameList = tuple([cKey, oKey, pKey, eKey])
-            args = [(0, 0), pose, (0, 0), outfit, (0, 0), expression]
-
-            if 'base' in character:
-                args = [(0, 0), character['base']] + args
-            define_image(size, nameList, args)
-            for oeKey in character['outfits_extra']:
-                outfit_extra = character['outfits_extra'][oeKey]
-                #print outfit_extra
+        if 'base' in character:
+            args = [(0, 0), character['base']] + args
+        define_image(size, side, nameList, args)
+        for oeKey in character['outfits_extra']:
+            outfit_extra = character['outfits_extra'][oeKey]
+            if isinstance(outfit_extra, dict):
+              if pKey in outfit_extra: #For each pose
                 nameList = tuple([cKey, oKey, oeKey, pKey, eKey])
-                define_image(size, nameList, args + [(0, 0), outfit_extra])
+                define_image(size, side, nameList, args + [(0, 0), outfit_extra[pKey]])
+            else:
+                nameList = tuple([cKey, oKey, oeKey, pKey, eKey])
+                define_image(size, side, nameList, args + [(0, 0), outfit_extra])
 
 ###
 #Example usage:
