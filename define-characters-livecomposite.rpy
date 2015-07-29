@@ -34,8 +34,6 @@ init python early:
           if argList[i] is not None:
               args.extend([(0, 0), argList[i]])
       renpy.image(path_tuple, LiveComposite(size, *args))
-      if 'valerie' in path_tuple:
-          print path_tuple
 
       if not side:
 
