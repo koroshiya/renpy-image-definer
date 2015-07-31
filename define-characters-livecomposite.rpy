@@ -142,7 +142,7 @@ init python early:
   #                   base.png
   #
   #If we then ran:
-  #define_characters("sprites/")
+  #define_chars("sprites/")
   #we would be able to call:
   #show sara uniform arms_crossed happy
   #and
