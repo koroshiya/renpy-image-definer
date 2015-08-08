@@ -283,7 +283,7 @@ init python early:
 
         for keys in product(*lists):
 
-          pList = [cName+'/base.png']
+          pList = [cKey+'/base.png']
 
           for i in xrange(0, len(lists)):
             pList.append(lists[i][keys[i]])
