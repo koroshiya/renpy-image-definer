@@ -161,7 +161,7 @@ init python early:
 
       for i in xrange(0, len(argList)):
           if argList[i] is not None:
-              args.extend([(0, 0), argList[i]])
+              args.extend([(0, 0), characterImageFolder + argList[i]])
       renpy.image(path_tuple, LiveComposite(size, *args))
 
       write_defs(f, size, args, path_tuple)
@@ -293,7 +293,7 @@ init python early:
 
         for keys in product(*lists):
 
-          pList = [cName+'/base.png']
+          pList = [cKey+'/base.png']
 
           for i in xrange(0, len(lists)):
             pList.append(lists[i][keys[i]])
@@ -324,6 +324,6 @@ init python early:
       if toWrite:
         f.close()
 
-  define_characters('sprites/', toWrite=True)
+  #define_characters('sprites/', toWrite=True)
   #Example of how to run. Uncomment above line and put your character folders in a 'sprites'
   #folder within your game directory.
