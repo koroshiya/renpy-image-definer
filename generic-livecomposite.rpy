@@ -134,31 +134,39 @@ init python early:
 
     return tmpDict
 
-  def write_defs(size, args, path_tuple):
-    s = 'LiveComposite((' + str(size[0]) + ',' + str(size[1]) + ')'
-    for arg in args:
-      s += ','
-      if isinstance(arg, tuple):
-        s += '(' + ','.join([str(x) for x in arg]) + ')'
-      else:
-        s += '"' + arg + '"'
-    s += ')'
+  def write_defs(f, size, args, path_tuple): #TODO: add name
+    if f is not None:
+      s = 'LiveComposite((' + str(size[0]) + ',' + str(size[1]) + ')'
+      for arg in args:
+        s += ','
+        if isinstance(arg, tuple):
+          s += '(' + ','.join([str(x) for x in arg]) + ')'
+        else:
+          s += '"' + arg + '"'
+      s += ')'
 
-    f.write('image '+' '.join(path_tuple)+' = '+s+'\n')
+      f.write('image '+' '.join(path_tuple)+' = '+s+'\n')
 
-  def define_image(size, side, path_tuple, argList, flip, toWrite):
-      if side:
-          path_tuple = ('side', ) + path_tuple
+  def define_image(imgSize, side, pTuple, argList, flip, f):
+    pTuples = [pTuple]
+    sizes = [imgSize]
+    if side:
+      pTuples.extend(('side', ) + pTuple)
+      sizes.extend(side)
+
+    for i in xrange(0, len(sizes)):
+      path_tuple = pTuples[i]
+      size = sizes[i]
       args = []
+
       for i in xrange(0, len(argList)):
           if argList[i] is not None:
               args.extend([(0, 0), argList[i]])
       renpy.image(path_tuple, LiveComposite(size, *args))
 
-      if toWrite:
-        write_defs(size, args, path_tuple)
+      write_defs(f, size, args, path_tuple)
 
-      if flip and not side:
+      if flip:
 
           flipArr = args
           for i in xrange(1, len(args), 2):
@@ -166,9 +174,6 @@ init python early:
           plist = list(path_tuple)
           plist.insert(1, 'flip') #flip after char name. eg. sara flip arms_crossed etc.
           renpy.image(tuple(plist), LiveComposite(size, *flipArr))
-
-      if toWrite:
-        write_defs(size, args, path_tuple)
 
   ###
   #characterImageFolder: folder to search for characters.
@@ -179,8 +184,10 @@ init python early:
   #flip: if true, also do a version of the image with the x axis flipped.
   #For character sprites, this simulates a character facing the other way.
   #
-  #side: if true, the image is a 'side' image.
-  #eg. a small image to be displayed in the textbox; NOT a character sprite.
+  #side: either false, or a tuple of (x, y).
+  #A side image would be a small image to be displayed in the textbox; NOT a character sprite.
+  #If the value is a size tuple, the side image will be cropped from the top left
+  #of the full image, for a total size of x, y.
   #
   #toWrite: if true, the definitions are written to file.
   #It is best to set this to True when you're about to distribute your game,
@@ -192,6 +199,8 @@ init python early:
   def define_characters(characterImageFolder, size=(370, 512), flip=True, side=False, toWrite=False):
       chars = {}
       indexes = get_character_indexes(False)
+
+      f = None
       if toWrite:
         f = open('characterDefinitionList.rpy','w')
 
@@ -220,7 +229,7 @@ init python early:
                     splitVal = os.path.splitext(pList[-1])[0]
 
                     if indexes[key]['nested'] == False:
-                      if splitVal not in chars[cName][key][pList[2]]:
+                      if splitVal not in chars[cName][key]:
                         chars[cName][key][splitVal] = path
                     elif splitVal != indexes[key]['file_name']:
                       chars[cName][key]['iterItems'][splitVal] = path
@@ -288,10 +297,11 @@ init python early:
 
           for i in xrange(0, len(lists)):
             pList.append(lists[i][keys[i]])
+          keys = (cKey, ) + keys
 
           if len(optionalFields) == 0:
 
-            define_image(size, side, keys, pList, flip, toWrite)
+            define_image(size, side, keys, pList, flip, f)
 
           else:
 
@@ -305,15 +315,15 @@ init python early:
                 tempList = pList
 
                 for o in reversed(opt):
-                  del tempKeys[o-1]
+                  del tempKeys[o]
                   del tempList[o]
 
                 tempKeys = tuple(tempKeys)
-                define_image(size, side, tempKeys, tempList, flip, toWrite)
+                define_image(size, side, tempKeys, tempList, flip, f)
 
       if toWrite:
         f.close()
 
-  #define_characters('sprites/')
+  define_characters('sprites/', toWrite=True)
   #Example of how to run. Uncomment above line and put your character folders in a 'sprites'
   #folder within your game directory.
