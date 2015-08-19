@@ -147,7 +147,7 @@ init python early:
 
       f.write('image '+' '.join(path_tuple)+' = '+s+'\n')
 
-  def define_image(imgSize, side, pTuple, argList, flip, f):
+  def define_image(imgSize, characterImageFolder, side, pTuple, argList, flip, f):
     pTuples = [pTuple]
     sizes = [imgSize]
     if side:
@@ -301,7 +301,7 @@ init python early:
 
           if len(optionalFields) == 0:
 
-            define_image(size, side, keys, pList, flip, f)
+            define_image(size, characterImageFolder, side, keys, pList, flip, f)
 
           else:
 
@@ -319,7 +319,7 @@ init python early:
                   del tempList[o]
 
                 tempKeys = tuple(tempKeys)
-                define_image(size, side, tempKeys, tempList, flip, f)
+                define_image(size, characterImageFolder, side, tempKeys, tempList, flip, f)
 
       if toWrite:
         f.close()
