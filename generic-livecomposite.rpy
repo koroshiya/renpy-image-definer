@@ -148,11 +148,11 @@ init python early:
       f.write('image '+' '.join(path_tuple)+' = '+s+'\n')
 
   def define_image(imgSize, characterImageFolder, side, pTuple, argList, flip, f):
-    pTuples = [pTuple]
-    sizes = [imgSize]
+    pTuples = (pTuple, )
+    sizes = (imgSize, )
     if side:
-      pTuples.extend(('side', ) + pTuple)
-      sizes.extend(side)
+      pTuples = (pTuple, (('side',) + pTuple))
+      sizes = (imgSize, side)
 
     for i in xrange(0, len(sizes)):
       path_tuple = pTuples[i]
