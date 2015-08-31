@@ -95,23 +95,26 @@ init python early:
   #
   #Finally, inside the directories, put the images you desire.
   ####
-  def get_character_indexes(empty=True):
-    dictionary = {
-      'expressions':{
-        'level':3,
-        'toggle':False
-      },
-      'outfits_extra':{
-        'level':4,
-        'toggle':True #TODO: look at entegrating ConditionSwitch instead
-      },
-      'poses':{
-        'level':2,
-        'nested':True,
-        'innerAbove':False,
-        'file_name':'pose' #if not defined, look for key
+  def get_character_indexes(empty=True, dictionary=False):
+
+    if not dictionary: #If user hasn't defined their own dictionary, use the default.
+      dictionary = {
+        'expressions':{
+          'level':3,
+          'toggle':False
+        },
+        'outfits_extra':{
+          'level':4,
+          'toggle':True #TODO: look at entegrating ConditionSwitch instead
+        },
+        'poses':{
+          'level':2,
+          'nested':True,
+          'innerAbove':False,
+          'file_name':'pose' #if not defined, look for key
+        }
       }
-    }
+
     tmpDict = dictionary
 
     if empty:
@@ -196,9 +199,9 @@ init python early:
   #ie. Run this method once with toWrite enabled, so you don't need to run this
   #method again.
   ###
-  def define_characters(characterImageFolder, size=(370, 512), flip=True, side=False, toWrite=False):
+  def define_characters(characterImageFolder, size=(370, 512), flip=True, side=False, toWrite=False, dictionary=False):
       chars = {}
-      indexes = get_character_indexes(False)
+      indexes = get_character_indexes(False, dictionary)
 
       f = None
       if toWrite:
@@ -218,7 +221,7 @@ init python early:
 
             if cName:
               if cName not in chars:
-                chars[cName] = get_character_indexes() #New character
+                chars[cName] = get_character_indexes(True, dictionary) #New character
 
               if len(pList) >= 4:
 
