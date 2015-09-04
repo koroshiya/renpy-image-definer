@@ -1,6 +1,7 @@
 init python early:
 
   from itertools import product, combinations
+  from copy import deepcopy
 
   ###
   #Get Character Indexes
@@ -115,7 +116,7 @@ init python early:
         }
       }
 
-    tmpDict = dictionary
+    tmpDict = deepcopy(dictionary)
 
     if empty:
       for key in tmpDict:
