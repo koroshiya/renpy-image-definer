@@ -288,10 +288,12 @@ init python early:
             if len(val) > 0:
 
               if 'toggle' in val and val['toggle']:
-                optionalFields.append(key)
+                if len(val) > 1:
+                  optionalFields.append(key)
                 del val['toggle']
 
-              lists.append(val)
+              if len(val) > 0: #Check again in case 'toggle' was the only value
+                lists.append(val)
 
         del toDefine
 
